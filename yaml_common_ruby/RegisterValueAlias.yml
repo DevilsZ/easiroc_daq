@@ -1,0 +1,159 @@
+---
+Time Constant HG Shaper:
+  25ns: 1
+  50ns: 2
+  75ns: 3
+  100ns: 4
+  125ns: 5
+  150ns: 6
+  175ns: 7
+Time Constant LG Shaper:
+  25ns: 1
+  50ns: 2
+  75ns: 3
+  100ns: 4
+  125ns: 5
+  150ns: 6
+  175ns: 7
+Capacitor HG PA Fdbck:
+  NoC: 0
+  100fF: 8
+  200fF: 4
+  300fF: 12
+  400fF: 2
+  500fF: 10
+  600fF: 6
+  700fF: 14
+  800fF: 1
+  900fF: 9
+  1.0pF: 5
+  1.1pF: 13
+  1.2pF: 3
+  1.3pF: 11
+  1.4pF: 7
+  1.5pF: 15
+Capacitor LG PA Fdbck:
+  NoC: 0
+  100fF: 8
+  200fF: 4
+  300fF: 12
+  400fF: 2
+  500fF: 10
+  600fF: 6
+  700fF: 14
+  800fF: 1
+  900fF: 9
+  1.0pF: 5
+  1.1pF: 13
+  1.2pF: 3
+  1.3pF: 11
+  1.4pF: 7
+  1.5pF: 15
+8-bit DAC reference:
+  external: 1
+  internal: 0
+Low Gain PA bias:
+  weakbias: 1
+  highbias: 0
+T&H bias(Widlar):
+  weakbias: 1
+  highbias: 0
+RS_or_discri:
+  RS: 1
+  trigger: 0
+DAC slope:
+  fine: 1
+  coarse: 0
+High Gain PreAmplifier PP:
+  Enable: 1
+  Disable: 0
+High Gain Slow Shaper PP:
+  Enable: 1
+  Disable: 0
+High Gain OTAq PP:
+  Enable: 1
+  Disable: 0
+Low Gain PreAmplifier PP:
+  Enable: 1
+  Disable: 0
+Low Gain Slow Shaper PP:
+  Enable: 1
+  Disable: 0
+Low Gain OTAq PP:
+  Enable: 1
+  Disable: 0
+T&H(Widlar SCA) PP:
+  Enable: 1
+  Disable: 0
+Probe OTAq PP:
+  Enable: 1
+  Disable: 0
+Fast Shaper PP:
+  Enable: 1
+  Disable: 0
+Fast Shapers Follower PP:
+  Enable: 1
+  Disable: 0
+Discriminator PP:
+  Enable: 1
+  Disable: 0
+DAC PP:
+  Enable: 1
+  Disable: 0
+LVDS receivers PP:
+  Enable: 1
+  Disable: 0
+BandGap PP:
+  Enable: 1
+  Disable: 0
+EN_input_dac:
+  Enable: 1
+  Disable: 0
+EN_High_Gain_PA:
+  Enable: 1
+  Disable: 0
+EN_High_Gain_Slow Shaper:
+  Enable: 1
+  Disable: 0
+EN_High Gain OTAq:
+  Enable: 1
+  Disable: 0
+EN_Low_Gain_PA:
+  Enable: 1
+  Disable: 0
+EN_Low_Gain_Slow Shaper:
+  Enable: 1
+  Disable: 0
+EN_Low Gain OTAq:
+  Enable: 1
+  Disable: 0
+EN_T&H(Widlar SCA):
+  Enable: 1
+  Disable: 0
+EN_Probe OTAq:
+  Enable: 1
+  Disable: 0
+EN_Fast Shaper:
+  Enable: 1
+  Disable: 0
+EN_discri:
+  Enable: 1
+  Disable: 0
+EN_DAC:
+  Enable: 1
+  Disable: 0
+EN_32_triggers:
+  Enable: 1
+  Disable: 0
+EN_out_dig:
+  Enable: 1
+  Disable: 0
+EN_OR32:
+  Enable: 1
+  Disable: 0
+EN_LVDS receivers:
+  Enable: 1
+  Disable: 0
+EN_BandGap:
+  Enable: 1
+  Disable: 0
