@@ -14,7 +14,7 @@ import time
 
 import threading
 
-from queue import Queue
+from queue import Queue, Empty
 from datetime import datetime
 from tqdm import tqdm
 
@@ -100,13 +100,17 @@ class VmeEasirocGUI:
         self.nevents.set(100)
         self.filename = tk.StringVar()
         self.filename.set('test')
+        self.nrepeats = tk.IntVar()
+        self.nrepeats.set(1)
         ttk.Label(root, text="Number of events").grid(row=row_counter+1, column=0, padx=10, pady=5, sticky=tk.W)
         ttk.Entry(root, textvariable=self.nevents, width=10).grid(row=row_counter+2, column=0, padx=10, pady=5)
         ttk.Label(root, text="File name to saved").grid(row=row_counter+1, column=1, padx=10, pady=5, sticky=tk.W)
         ttk.Entry(root, textvariable=self.filename, width=10).grid(row=row_counter+2, column=1, padx=10, pady=5)
+        ttk.Label(root, text="Number to repeats").grid(row=row_counter+1, column=2, padx=10, pady=5, sticky=tk.W)
+        ttk.Entry(root, textvariable=self.nrepeats, width=10).grid(row=row_counter+2, column=2, padx=10, pady=5)
         # START DAQ
-        self.start_button = ttk.Button(root, text="Start DAQ", command=lambda: self.start_daq(self.nevents.get(), self.filename.get()))
-        self.start_button.grid(row=row_counter+2, column=2, padx=10, pady=10)
+        self.start_button = ttk.Button(root, text="Start DAQ", command=lambda: self.start_daq(self.nevents.get(), self.filename.get(), self.nrepeats.get()))
+        self.start_button.grid(row=row_counter+1, column=3, padx=10, pady=10)
         # STOP DAQ
         self.stop_button = ttk.Button(root, text="!!STOP!!", command=lambda: self.stop_daq())
         self.stop_button.grid(row=row_counter+2, column=3, padx=10, pady=10)
@@ -155,33 +159,39 @@ class VmeEasirocGUI:
         row_counter = 23
         
         # redirect STDOUT to a text field
-        self.root.grid_rowconfigure(23, weight=1)  # Enable row 11 to resize
-        for col in range(4):  # Enable all columns to resize
-            self.root.grid_columnconfigure(col, weight=1)
+        ##
+        ## Because this function is not thread safe, disabled for the moment
+        ##
+        ## Comment out start :::
+        # self.root.grid_rowconfigure(23, weight=1)  # Enable row 11 to resize
+        #for col in range(4):  # Enable all columns to resize
+        #    self.root.grid_columnconfigure(col, weight=1)
         
-        self.output_frame = ttk.Frame(root)
-        self.output_frame.grid(row=row_counter, column=0,  columnspan=4, padx=10, pady=10, sticky="nsew")
+        #self.output_frame = ttk.Frame(root)
+        #self.output_frame.grid(row=row_counter, column=0,  columnspan=4, padx=10, pady=10, sticky="nsew")
 
-        self.text = tk.Text(self.output_frame, height=8, wrap="word")
-        self.text.grid(row=row_counter, column=0, sticky="nsew")
-        self.scrollbar = ttk.Scrollbar(self.output_frame, orient="vertical", command=self.text.yview)
-        self.scrollbar.grid(row=row_counter, column=1, sticky="ns")
-        self.text.configure(yscrollcommand=self.scrollbar.set)
+        #self.text = tk.Text(self.output_frame, height=8, wrap="word")
+        #self.text.grid(row=row_counter, column=0, sticky="nsew")
+        #self.scrollbar = ttk.Scrollbar(self.output_frame, orient="vertical", command=self.text.yview)
+        #self.scrollbar.grid(row=row_counter, column=1, sticky="ns")
+        #self.text.configure(yscrollcommand=self.scrollbar.set)
 
         # resize field to fit whole frame
-        self.output_frame.grid_rowconfigure(0, weight=1)
-        self.output_frame.grid_columnconfigure(0, weight=1)
+        #self.output_frame.grid_rowconfigure(0, weight=1)
+        #self.output_frame.grid_columnconfigure(0, weight=1)
 
         # redirect stdout to a field and stdout
-        self.original_stdout = sys.stdout
-        sys.stdout = TextRedirector(self.text, self.original_stdout, self.queue['main'])
-
+        #self.original_stdout = sys.stdout
+        #sys.stdout = TextRedirector(self.text, self.original_stdout, self.queue['main'])
+        #sys.stdout = SafeTextRedirector(self.queue['main'], self.original_stdout)
+        ## ::: Comment out end
+        
         # Handle window close event
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Periodically check and process queue
         self.process_queue()
-        
+
     def connect(self, name, ipaddr):
         """Connect to VME Easiroc."""
         if name in self.easiroc_modules:
@@ -228,29 +238,37 @@ class VmeEasirocGUI:
         print(f'Set HV to {value} on module {name}')
         self.dispatcher[name].increaseHV(value)
  
-    def start_daq(self, nevents, filename):
+    def start_daq(self, nevents, filename, nrepeats):
+        # Stop stdout on gui
+        #self.restore_original_stdout()
+
         self.daq_running = True
 
-        outputfilename1 = f'{filename}_1.dat'
-        outputfilename2 = f'{filename}_2.dat'
-        print(f'Start DAQ: output files:{outputfilename1}, {outputfilename2}')
-        commandname1 = f'read {nevents} {outputfilename1} default'
-        commandname2 = f'read {nevents} {outputfilename2} default'
+        for i in range(nrepeats):
+            outputfilename1 = f'{filename}_parent_{i}.dat'
+            outputfilename2 = f'{filename}_child_{i}.dat'
+            print(f'Start DAQ: output files:{outputfilename1}, {outputfilename2}')
+            commandname1 = f'read {nevents} {outputfilename1} default'
+            commandname2 = f'read {nevents} {outputfilename2} default'
 
-        # excute command within threads
-        process1 = threading.Thread(target=self.dispatcher['parent'].dispatch, args=(commandname1,))
-        process2 = threading.Thread(target=self.dispatcher['child'].dispatch,  args=(commandname2,))
+            # excute command within threads
+            process1 = threading.Thread(target=self.dispatcher['parent'].dispatch, args=(commandname1,))
+            process2 = threading.Thread(target=self.dispatcher['child'].dispatch,  args=(commandname2,))
 
-        # Start processes
-        process1.start()
-        time.sleep(0.1) # slight delay
-        process2.start()
+            # Start processes
+            process1.start()
+            time.sleep(0.1) # slight delay
+            process2.start()
 
-        # Wait end of process --> Unstable 
-        # process1.join()
-        # process2.join()
+            # Wait end of process --> Unstable 
+            process1.join()
+            process2.join()
+
+            time.sleep(1.0) # slight delay
         
         self.daq_running = False
+        # Restore stdout on GUI
+        #self.redirect_stdout_to_gui()
 
     def stop_daq(self):
         self.daq_running = False
@@ -350,6 +368,12 @@ class VmeEasirocGUI:
                 message = q.get_nowait()  # Retrieve the next message
                 self.text.insert("end", f"[{key}] {message}\n")  # Display the message with a label
                 self.text.see("end")  # Auto-scroll to the end
+
+    def redirect_stdout_to_gui(self):
+        sys.stdout = TextRedirector(self.text, self.original_stdout, self.queue['main'])
+
+    def restore_original_stdout(self):
+        sys.stdout = self.original_stdout
         
     def on_close(self):
         """Handle application close event."""
@@ -382,6 +406,19 @@ class TextRedirector:
 
     def flush(self):
         self.original_stdout.flush() 
+
+class SafeTextRedirector:
+    def __init__(self, queue, original_stdout):
+        self.queue = queue
+        self.original_stdout = original_stdout
+
+    def write(self, message):
+        self.queue.put(message)
+        self.original_stdout.write(message)
+
+    def flush(self):
+        self.original_stdout.flush()
+
         
 # Main Application
 if __name__ == "__main__":

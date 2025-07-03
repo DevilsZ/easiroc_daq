@@ -380,9 +380,9 @@ class CommandDispatcher:
             os.makedirs('data')
             
         data_filename = f'data/{filename}'
-        if "temp" not in filename and os.path.exists(data_filename):
+        if os.path.exists(data_filename):
             print(f"{data_filename} already exists.")
-            data_filename = f"data/temp_{int(time.time())}.dat"
+            data_filename = f"{data_filename.removesuffix('.dat')}_{int(time.time())}.dat"
 
         print(f"Save as {data_filename} {events} events")
 

@@ -97,7 +97,7 @@ class RBCP:
         raise RBCPError("Communication failed after retries")
 
     def com_sub(self, rw, address, data_length, data):
-        print(f"com_sub called: rw={rw}, addr=0x{address:X}, len={data_length}, data={data.hex() if data else None}")
+        print(f"com_sub called: host={self.host}, rw={rw}, addr=0x{address:X}, len={data_length}, data={data.hex() if data else None}")
 
         # Validate input types and values
         assert isinstance(address, int) and 0 <= address <= 0xFFFFFFFF, f"Invalid address: {address}"
