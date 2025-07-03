@@ -7,6 +7,7 @@ import time
 import subprocess
 import yaml
 import optparse
+import struct
 
 from queue import Queue
 from datetime import datetime
@@ -52,11 +53,11 @@ class CommandDispatcher:
         try:
             getattr(self, command)(*args)
         except AttributeError:
-            print(f"Command '{command}' not found.")
+            print(f"AttributeError:Command '{command} {args}' ")
         except TypeError as e:
             print(f"{e} invalid argument '{' '.join(args)}' for command '{command}'")
         except Exception as e:
-            print(str(e))
+            print(f'Exception {str(e)}')
             print("exit...")
             self.setHV(0.0)
             time.sleep(1)
@@ -220,6 +221,7 @@ class CommandDispatcher:
         self.slowcontrol()
 
     def setRegister(self, key, value):
+        # Unknow command, can be deleted?/
         self.vme_easiroc.set_register(key, value)
         time.sleep(0.5)
         self.slowcontrol()
@@ -373,10 +375,15 @@ class CommandDispatcher:
         if not filename.endswith('.dat'):
             filename += '.dat'
 
+        # check presence of directory
+        if not os.path.exists('data'):
+            os.makedirs('data')
+            
         data_filename = f'data/{filename}'
         if "temp" not in filename and os.path.exists(data_filename):
             print(f"{data_filename} already exists.")
             data_filename = f"data/temp_{int(time.time())}.dat"
+
         print(f"Save as {data_filename} {events} events")
 
         self.stop_requested = False
@@ -491,7 +498,7 @@ class CommandDispatcher:
         """)
 
     def version(self):
-        version_major, version_minor, version_hotfix, version_patch, year, month, day = self.vmeEasiroc.version
+        version_major, version_minor, version_hotfix, version_patch, year, month, day = self.vme_easiroc.version
         print(f"v.{version_major}.{version_minor}.{version_hotfix}-p{version_patch}")
         print(f"Synthesized on {year}-{month}-{day}")
 
@@ -502,15 +509,15 @@ class CommandDispatcher:
 
     def show_easiroc1(self):
         print("easiroc1.slowControl")
-        print(self.vmeEasiroc.easiroc1.slow_control)
+        print(self.vme_easiroc.easiroc1_slow_control)
         print("Easiroc1SlowControl")
-        print(self.vmeEasiroc.get_easiroc1_slow_control())
+        print(self.vme_easiroc.get_easiroc1_slow_control())
 
     def show_easiroc2(self):
         print("easiroc2.slowControl")
-        print(self.vmeEasiroc.easiroc2.slow_control)
+        print(self.vme_easiroc.easiroc2_slow_control)
         print("Easiroc2SlowControl")
-        print(self.vmeEasiroc.get_easiroc2_slow_control())
+        print(self.vme_easiroc.get_easiroc2_slow_control())
 
 if __name__ == "__main__":
     print(f'KK_DEBUG:Set up Looger') 

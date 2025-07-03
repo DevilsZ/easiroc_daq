@@ -251,6 +251,12 @@ class VmeEasiroc:
         logger.debug(f"TriggerDelay: {ivalue}")
         self.rbcp.write(address, ivalue)
 
+    def easiroc1_slow_control(self):
+        return self.easiroc1.slow_control
+
+    def easiroc2_slow_control(self):
+        return self.easiroc2.slow_control
+
     def get_easiroc1_slow_control(self):
         return self.config_loader.get_easiroc1_slow_control()
 
@@ -357,18 +363,20 @@ class VmeEasiroc:
         print(f'  DEBUG: read_event {number_to_read} {self.host}')
         try:
             self.sock = socket.create_connection((self.host, self.tcp_port), timeout=None) # Timeout
-            print(f"  DEBUG: Successfully connected to {self.host}:{self.tcp_port}")
+            print(f'  DEBUG: Successfully connected to {self.host}:{self.tcp_port}')
             try:
-                print(f'  DEBUG: read_event (2) {self.host}')
+                #print(f'  DEBUG: read_event (2) {self.host}')
                 self.read_and_throw_previous_data()
-                print(f'  DEBUG: read_event (3) {self.host}')
-                self.enter_daq_mode()
-                for _ in range(number_to_read):
-                    print(f'  DEBUG: read_event (4) {self.host}')
-                    header = self.receive_header()
-                    data = self.receive_data(header['dataSize'])
-                    yield header, data
-                    self.read_and_throw_previous_data()
+                #print(f'  DEBUG: read_event (3) {self.host}')
+                with self.enter_daq_mode():
+                    for _ in range(number_to_read):
+                        #print(f'  DEBUG: read_event (4) {self.host}')
+                        header = self.receive_header()
+                        #print(f"  DEBUG: data_size = {header['data_size']}")
+                        data = self.receive_data(header['data_size'])
+                        #print(f'  DEBUG: data = {header} {len(data)}')
+                        yield header, data
+                self.read_and_throw_previous_data()
             finally:
                 self.sock.close()
         except (socket.timeout, ConnectionRefusedError) as e:
@@ -697,12 +705,12 @@ class VmeEasiroc:
             return ret
 
     def receive_n_byte(self, num_bytes):
-        print(f'  DEBUG: receive_n_byte (0) {self.host}')
+        #print(f'  DEBUG: receive_n_byte (0) {self.host}')
         data = b''
         received_bytes = 0
         self.sock.settimeout(10)
         while received_bytes < num_bytes:
-            print(f'  DEBUG: receive_n_byte (1) {self.host} {num_bytes} - {received_bytes}')
+            #print(f'  DEBUG: receive_n_byte (1) {self.host} {num_bytes} - {received_bytes}')
             try:
                 chunk = self.sock.recv(num_bytes - received_bytes)
                 if not chunk:
@@ -716,27 +724,27 @@ class VmeEasiroc:
                 print(f"Socket error: {e}")
                 raise
 
-            print(f'  DEBUG: receive_n_byte (2) {self.host}')
+            #print(f'  DEBUG: receive_n_byte (2) {self.host}')
             if not received_data:
                 raise ConnectionError("Socket connection closed unexpectedly.")
-            print(f'  DEBUG: receive_n_byte (3) {self.host}')
+            #print(f'  DEBUG: receive_n_byte (3) {self.host}')
             data += received_data
             received_bytes += len(received_data)
         return data
 
     def receive_header(self):
-        print(f'  DEBUG: receive_header (0) {self.host}')
+        #print(f'  DEBUG: receive_header (0) {self.host}')
         raw_header = self.receive_n_byte(4)
         header = self.decode_word(struct.unpack(">I", raw_header)[0])  # Big-endian unsigned int
-        print(f'  DEBUG: receive_header (1) {self.host}')
+        #print(f'  DEBUG: receive_header (1) {self.host}')
         if self.new_format:
-            print(f'  DEBUG: receive_header (2.1) {self.host}')
+            #print(f'  DEBUG: receive_header (2.1) {self.host}')
             if (header & 0xFFFF0000) == 0xFF7C0000:
                 is_header = 1
             else:
                 is_header = 0
         else:
-            print(f'  DEBUG: receive_header (2.2) {self.host}')
+            #print(f'  DEBUG: receive_header (2.2) {self.host}')
             is_header = (header >> 27) & 1
             if is_header != 1:
                 raise ValueError("Frame Error 3")
@@ -756,15 +764,27 @@ class VmeEasiroc:
                 raise ValueError("Frame Error 5")
         return data
 
-    def read_and_throw_previous_data(self, timeout=0.1):
-        print(f'  DEBUG: read_and_throw_previous_data (0) {self.host}')
+    def read_and_throw_previous_data(self, timeout=0.1, max_total_bytes = 10000):
+        # print(f'  DEBUG: read_and_throw_previous_data (0) {self.host} {timeout}')
         thrown_size = 0
-        while True:
+        while True: # forever loop
+            #print(f'  DEBUG: read_and_throw_previous_data (1) {self.host} {thrown_size}')
             ready, _, _ = select.select([self.sock], [], [], timeout)
+            #print(ready)
             if not ready:
                 break
-            dummy = ready[0].recv(256)
+            dummy = ready[0].recv(256) # receive up to 256 bytes
+            # print(f'  DEBUG:: dummy = {dummy}')
+            if len(dummy) == 0:
+                print("Connection closed")
+                break
+            if not dummy:  # b'' means socket closed
+                print(f'  DEBUG: socket closed by peer')
+                break
             thrown_size += len(dummy)
+            #if thrown_size > max_total_bytes:
+            #    print("Too much data, stopping.")
+            #    break
         return thrown_size
 
     @staticmethod

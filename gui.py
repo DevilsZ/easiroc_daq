@@ -134,7 +134,7 @@ class VmeEasirocGUI:
         ttk.Label(root, text="Argument:").grid(row=row_counter+2, column=1, padx=10, pady=5, sticky=tk.W)
 
         # Create Combobox
-        values = ["testChargeTo", "setTESTPIN", "Command 2", "Command 4"]
+        values = ["testChargeTo", "setTestCharge", "setTESTPIN", "Command 4"]
         self.combobox = ttk.Combobox(root, values=values, state="readonly")
         self.combobox.grid(row=row_counter+3, column=0, padx=10, pady=5, sticky=tk.W)
         self.combobox.set("None")

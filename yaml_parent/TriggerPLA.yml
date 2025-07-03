@@ -1,4 +1,4 @@
-Cmd: 0x07  #disable:0x80, 
+Cmd: 0x80  #disable:0x80, 
            #channel specified by the channel,
            #orAnd32u:0x01, orAnd32d:0x02,
            #orAnd32u or orAnd32d  :0x03,
