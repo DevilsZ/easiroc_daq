@@ -1,0 +1,6 @@
+adc on
+tdc off
+scaler on
+stp on
+setStpMode 0
+regacyDataFormat off

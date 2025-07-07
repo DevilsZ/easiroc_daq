@@ -33,6 +33,17 @@ class CommandDispatcher:
         self.vme_easiroc = vme_easiroc
         self.q = q
         self.stop_requested = False
+        self.setStpMode(0)
+        # Run initial commands for .rc hidden file
+        run_command_file = os.path.join('./.rc')
+        if os.path.exists(run_command_file):
+            with open(run_command_file, 'r') as f:
+                for line in f:
+                    print(f'commands from .rc file: {line}')
+                    self.dispatch(line.strip())
+        else:
+            print('There is no initial command file .rc')
+                    
         
     def dispatch(self, line):
         if not line.strip():
@@ -520,7 +531,6 @@ class CommandDispatcher:
         print(self.vme_easiroc.get_easiroc2_slow_control())
 
 if __name__ == "__main__":
-    print(f'KK_DEBUG:Set up Looger') 
     # Logger setup
     logger = logging.getLogger()
     handler = logging.StreamHandler(sys.stdout)
@@ -542,7 +552,7 @@ if __name__ == "__main__":
         print("Usage: {} <Options> <IP Address>".format(sys.argv[0]))
         sys.exit(1)
 
-    print(f'KK_DEBUG:Int VME Easiroc: {ipaddr}') 
+    print(f'Int VME Easiroc: {ipaddr}') 
     vmeEasiroc = VmeEasiroc(ipaddr, 24, 4660, 'yaml_parent')
     vmeEasiroc.send_slow_control()
     vmeEasiroc.send_probe_register()
@@ -550,12 +560,13 @@ if __name__ == "__main__":
     
     # Call other initialization functions as needed
     path_of_this_file = os.path.abspath(os.path.dirname(__file__))
-    print(f'KK_DEBUG:Init CommandDispatcher: {path_of_this_file}') 
+
+    # Init dispatcher
     que = Queue()
     command_dispatcher = CommandDispatcher(vmeEasiroc, que)
 
     # Commands excuted initially
-    print(f'KK_DEBUG:Run Initial Command: {path_of_this_file}') 
+    print(f'KK_DEBUG:Run Initial Command: {path_of_this_file}/.rc') 
     run_command_file = os.path.join(path_of_this_file, '.rc')
     if os.path.exists(run_command_file):
         with open(run_command_file, 'r') as f:

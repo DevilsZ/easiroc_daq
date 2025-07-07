@@ -39,11 +39,11 @@ class VmeEasiroc:
         self.new_format = False
         self.reload_setting()
         self.exit_daq_mode()
-        self.send_adc = True
-        self.send_tdc = True
-        self.send_scaler = False
-        self.send_stp = False
-        self.new_format = False
+        #self.send_adc = True
+        #self.send_tdc = False
+        #self.send_scaler = True
+        #self.send_stp = True
+        #self.new_format = True
 
     @property
     def easiroc1(self):
@@ -708,7 +708,7 @@ class VmeEasiroc:
         #print(f'  DEBUG: receive_n_byte (0) {self.host}')
         data = b''
         received_bytes = 0
-        self.sock.settimeout(10)
+        self.sock.settimeout(None) # Never time out
         while received_bytes < num_bytes:
             #print(f'  DEBUG: receive_n_byte (1) {self.host} {num_bytes} - {received_bytes}')
             try:

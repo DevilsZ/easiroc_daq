@@ -5,7 +5,7 @@ EASIROC1:
         Time Constant LG Shaper: 75ns
         DAC code: 625
         DisablePA & In_calib_EN: [
-                1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0]
@@ -36,7 +36,7 @@ TimeWindow: 4095ns
 UsrClkOut: "OFF" #"OFF","ON",1Hz,10Hz,100Hz,1kHz.10kHz,100kHz,3MHz,25MHz
 Trigger:
         Mode: 0 #0-7
-        DelayTrigger: 27  #500MHz #default:-1, 0-253 #trig -> hold -> l1 -> l2
+        DelayTrigger: 5  #500MHz #default:-1, 0-253 #trig -> hold -> l1 -> l2
         DelayHold: 128     #25MHz
         DelayL1Trig: 2   #6MHz
         Width: raw       #raw or 40ns~800ns
