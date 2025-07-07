@@ -40,7 +40,12 @@ class VmeEasirocGUI:
         self.status = {} 
         self.status['parent'] = tk.StringVar(value="Status: Not Connected") # Status for Module 1
         self.status['child']  = tk.StringVar(value="Status: Not Connected") # Status for Module 2
+        # HV status value
+        self.statusHV = {} 
+        self.statusHV['parent'] = tk.StringVar(value="HV: ---") # StatusHV for Module 1
+        self.statusHV['child']  = tk.StringVar(value="HV: ---") # StatusHV for Module 2
 
+        # DAQ running flag
         self.daq_running = False
 
         row_counter = 0
@@ -80,9 +85,13 @@ class VmeEasirocGUI:
         self.HV_module1 = tk.DoubleVar(value=41.0)
         ttk.Entry(root, textvariable=self.HV_module1, width=10).grid(row=row_counter+1, column=0, padx=10, pady=5)
         ttk.Button(root, text="Set HV",  command=lambda: self.dispatch1('parent', 'increaseHV', self.HV_module1.get())).grid(row=row_counter+1, column=1, padx=10, pady=5)
+        ttk.Label(root, textvariable=self.statusHV['parent']).grid(row=row_counter+2, column=0, columnspan=2, padx=10, pady=5, sticky=tk.W)
+
         self.HV_module2 = tk.DoubleVar(value=43.0)
         ttk.Entry(root, textvariable=self.HV_module2, width=10).grid(row=row_counter+1, column=2, padx=10, pady=5)
         ttk.Button(root, text="Set HV",  command=lambda: self.dispatch1('child', 'increaseHV', self.HV_module2.get())).grid(row=row_counter+1, column=3, padx=10, pady=5)
+        ttk.Label(root, textvariable=self.statusHV['child']).grid(row=row_counter+2, column=2, columnspan=2, padx=10, pady=5, sticky=tk.W)
+
         # To shutdown HVs
         ttk.Button(root, text="Shutdown HV", command=lambda: self.dispatch0('parent', 'shutdownHV')).grid(row=row_counter+2, column=1, padx=10, pady=5)
         ttk.Button(root, text="Shutdown HV", command=lambda: self.dispatch0('child',  'shutdownHV')).grid(row=row_counter+2, column=3, padx=10, pady=5)
@@ -237,6 +246,7 @@ class VmeEasirocGUI:
         """Set HV using increaseHV function"""
         print(f'Set HV to {value} on module {name}')
         self.dispatcher[name].increaseHV(value)
+        self.statusHV[name].set(f'HV: {self.dispatcher[name].dispatch('statusHV')} V')
  
     def start_daq(self, nevents, filename, nrepeats):
         # Stop stdout on gui

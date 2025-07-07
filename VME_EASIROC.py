@@ -620,13 +620,13 @@ class VmeEasiroc:
         
         logger.debug("VmeEasiroc::sendSlowControl:")
         logger.debug("Easiroc1")
-        logger.debug("".join(f"       {i:02X}\n" for i in easiroc1))
+        logger.debug("".join(f"{i:02X}, " for i in easiroc1))
         address = self.slow_control1_address()
         self.rbcp.write(address, easiroc1)
 
         logger.debug("VmeEasiroc::sendSlowControl:")
         logger.debug("Easiroc2")
-        logger.debug("".join(f"        {i:02X}\n" for i in easiroc2))
+        logger.debug("".join(f"{i:02X}, " for i in easiroc2))
         address = self.slow_control2_address()
         self.rbcp.write(address, easiroc2)
 

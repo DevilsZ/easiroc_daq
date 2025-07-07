@@ -151,6 +151,7 @@ class CommandDispatcher:
         # Read the MPPC bias current
         rd_madc = self.vme_easiroc.read_madc(4)
         print(f"Bias current >> {rd_madc:.2f} uA")
+        return rd_madc
 
     def statusTemp(self):
         self.vme_easiroc.send_madc_control()
