@@ -246,7 +246,7 @@ class VmeEasirocGUI:
         """Set HV using increaseHV function"""
         print(f'Set HV to {value} on module {name}')
         self.dispatcher[name].increaseHV(value)
-        self.statusHV[name].set(f'HV: {self.dispatcher[name].dispatch('statusHV')} V')
+        self.statusHV[name].set(f"HV: {self.dispatcher[name].dispatch('statusHV')} V")
  
     def start_daq(self, nevents, filename, nrepeats):
         # Stop stdout on gui
