@@ -6,6 +6,10 @@
 ## Getting started
 ```console: Create environment
 $ conda create -n easiroc python=3.10
+$ conda activate easiroc
+$ conda install pip
+$ pip install pyyaml
+$ pip install tqdm
 ```
 
 ## Excute program
